@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Análisis FX – Arauco Equipo 3</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --taupe:        #706860;
+      --taupe-dark:   #4A4240;
+      --taupe-mid:    #8A817A;
+      --taupe-pale:   #F5F2EF;
+      --orange:       #F47920;
+      --orange-dark:  #D4640D;
+      --orange-light: #FEF0E0;
+      --text-dark:    #2D2D2D;
+      --text-mid:     #606060;
+      --text-light:   #F5F5F5;
+      --white:        #FFFFFF;
+      --bg:           #F8F8F8;
+      --border:       #E2E2E2;
+      --shadow:       0 2px 16px rgba(0,0,0,0.07);
+      --shadow-lg:    0 6px 32px rgba(0,0,0,0.12);
+      --radius:       10px;
+      --radius-lg:    16px;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--white);
+      color: var(--text-dark);
+      line-height: 1.7;
+    }
+
+    /* NAVBAR */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--taupe);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 60px; gap: 1.5rem;
+    }
+    .nav-logo-svg { flex-shrink: 0; }
+    .nav-links { display: flex; gap: 0.15rem; list-style: none; overflow-x: auto; flex-wrap: nowrap; }
+    .nav-links a {
+      color: rgba(255,255,255,0.82);
+      text-decoration: none; font-size: 0.77rem; font-weight: 500;
+      padding: 0.35rem 0.65rem; border-radius: 5px;
+      white-space: nowrap; transition: all 0.18s;
+    }
+    .nav-links a:hover { background: rgba(255,255,255,0.15); color: #fff; }
+    .nav-links a.active { background: var(--orange); color: #fff; }
+
+    /* HERO */
+    #inicio {
+      background: var(--taupe-dark);
+      color: var(--text-light);
+      padding: 6rem 2rem 5rem;
+      position: relative; overflow: hidden;
+    }
+    #inicio::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23F47920' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+    .hero-logo { margin-bottom: 2rem; }
+    .hero-tag {
+      display: inline-block; background: var(--orange); color: #fff;
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 0.28rem 0.85rem; border-radius: 20px; margin-bottom: 1.4rem;
+    }
+    .hero-inner h1 {
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      font-weight: 800; line-height: 1.15; margin-bottom: 1rem;
+    }
+    .hero-inner h1 span { color: var(--orange); }
+    .hero-inner > p {
+      font-size: 1.05rem; color: rgba(255,255,255,0.78);
+      max-width: 640px; margin-bottom: 2.5rem; text-align: justify;
+    }
+    .hero-stats {
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 0.85rem; margin-top: 2rem;
+    }
+    @media (max-width: 800px) { .hero-stats { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 500px) { .hero-stats { grid-template-columns: repeat(2, 1fr); } }
+    .hero-stat {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.13);
+      border-radius: var(--radius); padding: 1.1rem 0.6rem; text-align: center; min-width: 0;
+    }
+    .hero-stat .val {
+      font-size: clamp(0.95rem, 2vw, 1.45rem); font-weight: 800; color: var(--orange);
+      display: block; word-break: break-word; line-height: 1.2;
+    }
+    .hero-stat .lbl { font-size: 0.68rem; color: rgba(255,255,255,0.55); margin-top: 0.3rem; line-height: 1.3; }
+
+    /* SECTIONS */
+    section { padding: 5rem 2rem; }
+    section.on-white { background: var(--white); }
+    section.on-gray  { background: var(--bg); }
+    section.on-taupe { background: var(--taupe); color: var(--text-light); }
+    .container { max-width: 1100px; margin: 0 auto; }
+
+    .section-header { margin-bottom: 2.75rem; }
+    .section-tag {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--orange); margin-bottom: 0.45rem; display: block;
+    }
+    .section-header h2 {
+      font-size: clamp(1.5rem, 3.2vw, 2.2rem); font-weight: 800; line-height: 1.2; color: var(--text-dark);
+    }
+    section.on-taupe .section-header h2 { color: var(--white); }
+    section.on-taupe .section-header p  { color: rgba(255,255,255,0.78); }
+    .section-header p {
+      margin-top: 0.7rem; font-size: 1rem; color: var(--text-mid);
+      max-width: 700px; text-align: justify;
+    }
+    .divider {
+      height: 3px; width: 44px;
+      background: linear-gradient(90deg, var(--orange), var(--orange-dark));
+      border-radius: 2px; margin: 0.9rem 0;
+    }
+
+    /* CARDS */
+    .cards { display: grid; gap: 1.25rem; }
+    .cards.cols-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+    .cards.cols-3 { grid-template-columns: repeat(auto-fit, minmax(255px, 1fr)); }
+    .cards.cols-4 { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+    .card {
+      background: var(--white); border-radius: var(--radius-lg);
+      padding: 1.75rem; box-shadow: var(--shadow); border: 1px solid var(--border);
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .card-icon {
+      width: 42px; height: 42px; border-radius: 9px; background: var(--orange-light);
+      display: flex; align-items: center; justify-content: center; font-size: 1.2rem; margin-bottom: 0.9rem;
+    }
+    .card h3 { font-size: 1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.45rem; }
+    .card p  { font-size: 0.9rem; color: var(--text-mid); line-height: 1.6; text-align: justify; }
+    .card .tag {
+      display: inline-block; margin-top: 0.7rem; background: var(--orange-light); color: var(--orange-dark);
+      font-size: 0.7rem; font-weight: 700; padding: 0.22rem 0.6rem; border-radius: 20px;
+    }
+
+    /* STAT BOX */
+    .stat-box {
+      background: var(--white); border-radius: var(--radius); border-left: 4px solid var(--orange);
+      padding: 1.25rem 1.4rem; box-shadow: var(--shadow);
+    }
+    .stat-box .num  { font-size: 1.75rem; font-weight: 800; color: var(--text-dark); }
+    .stat-box .desc { font-size: 0.84rem; color: var(--text-mid); text-align: justify; }
+
+    /* PLANT CARDS */
+    .plant-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.25rem; }
+    .plant-card {
+      background: var(--white); border-radius: var(--radius-lg); padding: 1.6rem;
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+      position: relative; overflow: hidden;
+    }
+    .plant-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--orange-dark), var(--orange));
+    }
+    .plant-card h3 { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.45rem; }
+    .plant-card p  { font-size: 0.9rem; color: var(--text-mid); text-align: justify; }
+
+    /* COMPETITOR GRID */
+    .comp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(225px, 1fr)); gap: 1rem; }
+    .comp-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.4rem; border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+    .comp-card .type {
+      font-size: 0.67rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--orange-dark); margin-bottom: 0.3rem; display: block;
+    }
+    .comp-card h4 { font-size: 0.98rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.35rem; }
+    .comp-card p  { font-size: 0.86rem; color: var(--text-mid); text-align: justify; }
+
+    /* MACRO TAUPE */
+    .macro-split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 700px) { .macro-split { grid-template-columns: 1fr; } }
+    .macro-block {
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.18);
+      border-radius: var(--radius-lg); padding: 1.75rem;
+    }
+    .macro-block h3 { font-size: 1.1rem; font-weight: 700; color: var(--orange); margin-bottom: 0.85rem; }
+    .macro-block p  { font-size: 0.9rem; color: rgba(255,255,255,0.78); text-align: justify; }
+    .macro-kpi { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-top: 0.85rem; }
+    .kpi-pill { background: rgba(255,255,255,0.12); border-radius: 7px; padding: 0.45rem 0.85rem; text-align: center; }
+    .kpi-pill .kval { font-size: 1rem; font-weight: 800; color: var(--orange); display: block; }
+    .kpi-pill .klbl { font-size: 0.67rem; color: rgba(255,255,255,0.55); }
+
+    /* RISK GRID */
+    .risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(275px, 1fr)); gap: 1.1rem; }
+    .risk-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.4rem; border-left: 4px solid var(--orange); box-shadow: var(--shadow);
+    }
+    .risk-card.medium { border-left-color: var(--taupe-mid); }
+    .risk-card.high   { border-left-color: #C0392B; }
+    .risk-card h4 { font-size: 0.93rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.35rem; }
+    .risk-card p  { font-size: 0.86rem; color: var(--text-mid); text-align: justify; }
+
+    /* EXPOSURE GRID */
+    .exposure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 1rem; }
+    .exp-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.4rem 1.2rem; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center;
+    }
+    .exp-card .e-icon { font-size: 1.8rem; margin-bottom: 0.65rem; display: block; }
+    .exp-card h4 { font-size: 0.88rem; font-weight: 700; color: var(--text-dark); margin-bottom: 0.35rem; }
+    .exp-card p  { font-size: 0.82rem; color: var(--text-mid); }
+
+    /* TABLES */
+    .supuestos-table { width: 100%; border-collapse: collapse; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+    .supuestos-table th, .supuestos-table td { padding: 0.8rem 1.2rem; text-align: left; font-size: 0.9rem; }
+    .supuestos-table th { background: var(--taupe); color: #fff; font-weight: 700; }
+    .supuestos-table tr:nth-child(even) td { background: var(--taupe-pale); }
+    .supuestos-table tr:nth-child(odd)  td { background: var(--white); }
+    .supuestos-table td:last-child { font-weight: 700; color: var(--text-dark); }
+
+    /* STRADDLE COSTS */
+    .straddle-costs { display: grid; grid-template-columns: repeat(auto-fit, minmax(195px, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+    .cost-box {
+      background: var(--white); border-radius: var(--radius);
+      padding: 1.4rem; border: 1px solid var(--border); text-align: center; box-shadow: var(--shadow);
+    }
+    .cost-box .cost-lbl { font-size: 0.73rem; color: var(--text-mid); margin-bottom: 0.45rem; }
+    .cost-box .cost-val { font-size: 1.2rem; font-weight: 800; color: var(--text-dark); }
+    .cost-box .cost-sub { font-size: 0.77rem; color: var(--taupe-mid); margin-top: 0.2rem; }
+    .cost-box.highlight { background: var(--taupe); border-color: var(--taupe); }
+    .cost-box.highlight .cost-lbl { color: rgba(255,255,255,0.65); }
+    .cost-box.highlight .cost-val { color: var(--orange); font-size: 1.3rem; }
+    .cost-box.highlight .cost-sub { color: rgba(255,255,255,0.55); }
+
+    /* SCENARIO CARDS */
+    .scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .scenario-card { border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow); border: 1.5px solid transparent; }
+    .scenario-card.pessimist { background: #FFF5F3; border-color: #F4C4B6; }
+    .scenario-card.base      { background: var(--orange-light); border-color: #F5CA9E; }
+    .scenario-card.optimist  { background: var(--taupe-pale); border-color: #D2C8C0; }
+    .scenario-card .sc-label {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; margin-bottom: 0.3rem; display: block;
+    }
+    .scenario-card.pessimist .sc-label { color: #B03020; }
+    .scenario-card.base      .sc-label { color: var(--orange-dark); }
+    .scenario-card.optimist  .sc-label { color: var(--taupe); }
+    .scenario-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .scenario-card.pessimist h3 { color: #B03020; }
+    .scenario-card.base      h3 { color: var(--orange-dark); }
+    .scenario-card.optimist  h3 { color: var(--taupe); }
+    .scenario-card .sc-rate { font-size: 2.2rem; font-weight: 900; line-height: 1; margin-bottom: 0.6rem; }
+    .scenario-card.pessimist .sc-rate { color: #B03020; }
+    .scenario-card.base      .sc-rate { color: var(--orange); }
+    .scenario-card.optimist  .sc-rate { color: var(--taupe); }
+    .scenario-card .sc-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 0.38rem 0; font-size: 0.86rem; border-bottom: 1px solid rgba(0,0,0,0.06); gap: 0.5rem;
+    }
+    .scenario-card .sc-row:last-of-type { border-bottom: none; }
+    .scenario-card .sc-row .sc-lbl { color: var(--text-mid); flex: 1; }
+    .scenario-card .sc-row .sc-val { font-weight: 700; color: var(--text-dark); text-align: right; white-space: nowrap; }
+    .scenario-card .sc-net { margin-top: 1rem; padding: 0.7rem 1rem; border-radius: 8px; text-align: center; }
+    .scenario-card.pessimist .sc-net { background: #FDE8E3; }
+    .scenario-card.base      .sc-net { background: #FDEDD0; }
+    .scenario-card.optimist  .sc-net { background: #E8E0D8; }
+    .sc-net .net-lbl { font-size: 0.72rem; color: var(--text-mid); display: block; margin-bottom: 0.2rem; }
+    .sc-net .net-val { font-size: 1.15rem; font-weight: 800; }
+    .scenario-card.pessimist .sc-net .net-val { color: #B03020; }
+    .scenario-card.base      .sc-net .net-val { color: var(--orange-dark); }
+    .scenario-card.optimist  .sc-net .net-val { color: var(--taupe); }
+
+    /* VE TABLE */
+    .ve-table { width: 100%; border-collapse: collapse; box-shadow: var(--shadow); border-radius: var(--radius); overflow: hidden; }
+    .ve-table th { background: var(--taupe); color: #fff; padding: 0.8rem 1rem; font-size: 0.85rem; text-align: center; }
+    .ve-table td { padding: 0.75rem 1rem; font-size: 0.85rem; text-align: center; border-bottom: 1px solid var(--border); background: var(--white); }
+    .ve-table tr:last-child td { background: var(--taupe-pale); font-weight: 800; }
+    .ve-table td:first-child { text-align: left; font-weight: 600; }
+
+    /* HIGHLIGHT BOX */
+    .highlight-box { background: var(--taupe); color: #fff; border-radius: var(--radius-lg); padding: 2.25rem; margin: 2rem 0; }
+    .highlight-box h3 { color: var(--orange); font-size: 1.15rem; font-weight: 800; margin-bottom: 0.65rem; }
+    .highlight-box p  { color: rgba(255,255,255,0.82); font-size: 0.93rem; text-align: justify; }
+    .hb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0.85rem; margin-top: 1.4rem; }
+    .hb-item { background: rgba(255,255,255,0.1); border-radius: 9px; padding: 0.9rem 0.75rem; text-align: center; }
+    .hb-item .hv { font-size: 1.3rem; font-weight: 800; color: var(--orange); display: block; }
+    .hb-item .hl { font-size: 0.73rem; color: rgba(255,255,255,0.6); margin-top: 0.2rem; }
+
+    /* CALLOUT */
+    .callout {
+      background: var(--orange-light); border-left: 4px solid var(--orange);
+      border-radius: 9px; padding: 1.15rem 1.4rem;
+      font-size: 0.93rem; color: var(--text-dark); margin: 1.5rem 0; text-align: justify;
+    }
+    .callout strong { font-weight: 800; }
+
+    /* SOURCES */
+    .sources-list { display: flex; flex-direction: column; gap: 0.45rem; }
+    .source-item {
+      background: var(--white); border-radius: 7px; padding: 0.7rem 1rem;
+      border: 1px solid var(--border); font-size: 0.83rem; color: var(--text-mid);
+    }
+    .source-item a { color: var(--orange-dark); text-decoration: none; }
+    .source-item a:hover { text-decoration: underline; }
+
+    /* FOOTER */
+    footer { background: var(--taupe-dark); color: rgba(255,255,255,0.6); text-align: center; padding: 2.5rem 2rem; font-size: 0.84rem; }
+    footer strong { color: var(--orange); }
+
+    .subsection-title { font-size: 1.1rem; font-weight: 700; color: var(--text-dark); margin: 2.25rem 0 1.1rem; }
+
+    /* APP BUTTONS */
+    .app-buttons { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2rem; }
+    .app-btn {
+      display: inline-flex; align-items: center; gap: 0.55rem;
+      padding: 0.75rem 1.4rem; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 700; text-decoration: none;
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    .app-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 18px rgba(0,0,0,0.18); }
+    .app-btn.orange { background: var(--orange); color: #fff; }
+    .app-btn.orange:hover { background: var(--orange-dark); }
+    .app-btn.taupe { background: rgba(255,255,255,0.18); color: #fff; border: 1.5px solid rgba(255,255,255,0.35); }
+    .app-btn.taupe:hover { background: rgba(255,255,255,0.28); }
+    .app-btn svg { flex-shrink: 0; }
+    p.body-text { font-size: 0.92rem; color: var(--text-mid); text-align: justify; margin-top: 0.75rem; }
+
+    @media (max-width: 768px) {
+      .nav-links a { font-size: 0.7rem; padding: 0.28rem 0.5rem; }
+      section { padding: 3.5rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-inner">
+    <a href="#inicio" class="nav-logo-svg">
+      <svg width="128" height="34" viewBox="0 0 128 34" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="21" font-family="'Segoe UI', system-ui, sans-serif" font-size="21" font-weight="800" letter-spacing="-0.4" fill="#E8D8C8">arauco</text>
+        <text x="2" y="32" font-family="'Segoe UI', system-ui, sans-serif" font-size="9" font-weight="700" letter-spacing="2.8" fill="#F47920">MELAMINA</text>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#empresa">Empresa</a></li>
+      <li><a href="#mexico">México</a></li>
+      <li><a href="#competidores">Competidores</a></li>
+      <li><a href="#entorno">Entorno Global</a></li>
+      <li><a href="#exposicion">Exposición FX</a></li>
+      <li><a href="#riesgos">Riesgos</a></li>
+      <li><a href="#cobertura">Cobertura</a></li>
+      <li><a href="#escenarios">Escenarios</a></li>
+      <li><a href="#fuentes">Fuentes</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="inicio">
+  <div class="hero-inner">
+    <div class="hero-logo">
+      <svg width="220" height="64" viewBox="0 0 220 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <text x="0" y="42" font-family="'Segoe UI', system-ui, sans-serif" font-size="44" font-weight="800" letter-spacing="-1" fill="#E8D8C8">arauco</text>
+        <text x="3" y="60" font-family="'Segoe UI', system-ui, sans-serif" font-size="17" font-weight="700" letter-spacing="4.5" fill="#F47920">MELAMINA</text>
+      </svg>
+    </div>
+    <span class="hero-tag">Análisis Estratégico · 2026</span>
+    <h1>Análisis de Exposición <span>Cambiaria FX</span> para Arauco</h1>
+    <p>Impacto de la volatilidad USD/MXN en la rentabilidad, costos operativos y posicionamiento de Arauco en México y LATAM.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="val">#3</span><div class="lbl">Celulosa de mercado mundial</div></div>
+      <div class="hero-stat"><span class="val">#3</span><div class="lbl">Producción de paneles mundial</div></div>
+      <div class="hero-stat"><span class="val">US$6,084M</span><div class="lbl">Ingresos anuales</div></div>
+      <div class="hero-stat"><span class="val">5.15x</span><div class="lbl">Deuda Neta / EBITDA</div></div>
+      <div class="hero-stat"><span class="val">Carbono Neutral</span><div class="lbl">1ª empresa forestal certificada</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- EMPRESA -->
+<section id="empresa" class="on-white">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Perfil corporativo</span>
+      <h2>Arauco: Empresa Forestal Renovable e Integrada</h2>
+      <div class="divider"></div>
+      <p>Compañía chilena con más de 50 años de historia que participa en toda la cadena de valor forestal: desde la plantación de pino y eucalipto hasta la producción de celulosa, maderas, paneles y energía a partir de biomasa.</p>
+    </div>
+    <div class="cards cols-3">
+      <div class="card"><div class="card-icon">🌲</div><h3>Integración Vertical</h3><p>Control del proceso de principio a fin: plantación, producción de celulosa, maderas, paneles y generación de energía por biomasa.</p><span class="tag">Cadena completa</span></div>
+      <div class="card"><div class="card-icon">📊</div><h3>Resultados Financieros</h3><p>Ingresos de <strong>US$6,084M</strong> distribuidos casi por igual entre celulosa y madera. EBITDA ajustado de <strong>US$1,331M</strong>.</p><span class="tag">EBITDA US$1,331M</span></div>
+      <div class="card"><div class="card-icon">🌍</div><h3>Presencia Global</h3><p>Posición #3 mundial tanto en capacidad de celulosa como en producción de paneles. Opera en Chile, Brasil, Argentina, México y Uruguay.</p><span class="tag">#3 Mundial</span></div>
+      <div class="card"><div class="card-icon">♻️</div><h3>Carbono Neutral</h3><p>Primera empresa forestal del mundo certificada como Carbono Neutral. Comprometida con reducir 1.5M de toneladas de CO₂.</p><span class="tag">Certificación global</span></div>
+      <div class="card"><div class="card-icon">⚡</div><h3>Energía por Biomasa</h3><p>Genera energía renovable a partir de residuos forestales, reduciendo su huella ambiental y sus costos energéticos internos.</p><span class="tag">Energía renovable</span></div>
+      <div class="card"><div class="card-icon">🏭</div><h3>Capacidad Industrial</h3><p>Operaciones industriales en Sudamérica y México, con <strong>US$345M</strong> en inversiones activas en el país.</p><span class="tag">US$345M en México</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- MÉXICO -->
+<section id="mexico" class="on-gray">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Operaciones locales</span>
+      <h2>Fabricante #1 de Tableros en México</h2>
+      <div class="divider"></div>
+      <p>Arauco inició operaciones industriales en México en 2019. Se apoya en tres plantas principales que atienden a las industrias del mueble, construcción y diseño interior.</p>
+    </div>
+    <div class="plant-grid">
+      <div class="plant-card"><h3>Durango</h3><p>Instalación de tableros y planta química de resinas estratégica para la cadena de suministro. Eje de producción química nacional.</p></div>
+      <div class="plant-card"><h3>Cuautitlán</h3><p>Producción de pallets con capacidad de <strong>2.5 millones de unidades anuales</strong> para logística nacional y distribución regional.</p></div>
+      <div class="plant-card"><h3>Zitácuaro</h3><p>El complejo de tableros más grande de la empresa en el país. Núcleo principal de la operación industrial de Arauco México.</p></div>
+    </div>
+    <h3 class="subsection-title">Participación de Mercado Dominante en México</h3>
+    <div class="cards cols-3">
+      <div class="stat-box"><div class="num">30%</div><div class="desc">Participación en MDF (Tablero de Fibra de Densidad Media)</div></div>
+      <div class="stat-box"><div class="num">30%</div><div class="desc">Participación en PBO / MDP (Aglomerado)</div></div>
+      <div class="stat-box"><div class="num">40%</div><div class="desc">Participación en Melamina (acabado decorativo)</div></div>
+    </div>
+    <p class="body-text">Portafolio: MDF, PBO, PBO RH, MDP y Melamina — orientados a mueble, construcción, remodelación del hogar y decoración.</p>
+  </div>
+</section>
+
+<!-- COMPETIDORES -->
+<section id="competidores" class="on-white">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Panorama competitivo</span>
+      <h2>Competidores y Dinámica de Exposición FX</h2>
+      <div class="divider"></div>
+      <p>Análisis del paisaje competitivo y cómo los movimientos cambiarios afectan de forma distinta a cada jugador del mercado de paneles en México.</p>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-card"><span class="type">Rival doméstico</span><h4>FINSA</h4><p>Principal fabricante doméstico de paneles. Vende en MXN — exposición FX similar a Arauco. Sin ventaja diferencial en depreciación.</p></div>
+      <div class="comp-card"><span class="type">Global</span><h4>West Fraser</h4><p>#2 global en paneles. Fuerte presencia en Norteamérica compitiendo directamente en los mercados clave de Arauco.</p></div>
+      <div class="comp-card"><span class="type">Precedente</span><h4>Masisa</h4><p>Exrival directo. Arauco adquirió sus plantas mexicanas en 2019 por US$245M. Aún compite en mercados LATAM.</p></div>
+      <div class="comp-card"><span class="type">Europeo</span><h4>Egger</h4><p>Gigante europeo de paneles que compite en los segmentos de melamina y MDF a lo largo de LATAM.</p></div>
+      <div class="comp-card"><span class="type">Europeo · Ventaja FX</span><h4>Kronospan</h4><p>Exporta a México desde Europa. Se beneficia cuando el MXN se fortalece. Rivalidad directa en precio.</p></div>
+      <div class="comp-card"><span class="type">Expansión LATAM</span><h4>Kastamonu</h4><p>Productor turco que se expande activamente hacia mercados latinoamericanos. Competidor emergente a vigilar.</p></div>
+    </div>
+    <div class="callout"><strong>Clave estratégica:</strong> Un peso débil encarece los insumos importados tanto para Arauco como para FINSA (sin ventaja relativa), pero hace más caros los productos de Kronospan y Egger, otorgando a Arauco una <strong>ventaja competitiva de precio temporal</strong> frente a importadores europeos.</div>
+  </div>
+</section>
+
+<!-- ENTORNO GLOBAL -->
+<section id="entorno" class="on-taupe">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Macroeconomía · 2026</span>
+      <h2>Entorno Global: Dólar Firme y Choque Energético</h2>
+      <div class="divider" style="background: linear-gradient(90deg, var(--orange), #F5A55A);"></div>
+      <p>Dos frentes dominan el entorno macroeconómico de Arauco en 2026: la política monetaria de EE.UU. y la crisis energética derivada del conflicto en Medio Oriente.</p>
+    </div>
+    <div class="macro-split">
+      <div class="macro-block">
+        <h3>Estados Unidos</h3>
+        <p>La Fed mantiene su tasa en 3.5%–3.75%. Kevin Warsh preside el banco central desde mayo con sesgo hacia recortes. El dólar sigue fuerte (DXY ~99). Norteamérica concentra ~30% de las ventas de Arauco.</p>
+        <div class="macro-kpi">
+          <div class="kpi-pill"><span class="kval">3.5–3.75%</span><span class="klbl">Tasa Fed</span></div>
+          <div class="kpi-pill"><span class="kval">~99</span><span class="klbl">DXY</span></div>
+          <div class="kpi-pill"><span class="kval">~30%</span><span class="klbl">Ventas N. América</span></div>
+        </div>
+      </div>
+      <div class="macro-block">
+        <h3>Conflicto en Medio Oriente</h3>
+        <p>La guerra EE.UU.–Israel–Irán (feb 2026) interrumpió ~20% del suministro mundial de petróleo por el Estrecho de Ormuz. Encarece resinas, urea, metanol y fenol — insumos clave de Arauco.</p>
+        <div class="macro-kpi">
+          <div class="kpi-pill"><span class="kval">&gt;US$100</span><span class="klbl">Brent/barril</span></div>
+          <div class="kpi-pill"><span class="kval">~20%</span><span class="klbl">Suministro afectado</span></div>
+          <div class="kpi-pill"><span class="kval">+49%</span><span class="klbl">Urea (4 meses)</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="macro-split" style="margin-top: 1.5rem;">
+      <div class="macro-block">
+        <h3>Chile — Matriz</h3>
+        <p>Banco Central en 4.5%. Cobre ~US$6/lb. La guerra en Medio Oriente revirtió la apreciación del peso chileno. PIB recortado a 1.5%–2.5%. Arauco consolida en dólares.</p>
+        <div class="macro-kpi">
+          <div class="kpi-pill"><span class="kval">4.5%</span><span class="klbl">Tasa BCC</span></div>
+          <div class="kpi-pill"><span class="kval">~US$6/lb</span><span class="klbl">Cobre</span></div>
+          <div class="kpi-pill"><span class="kval">1.5–2.5%</span><span class="klbl">PIB 2026</span></div>
+        </div>
+      </div>
+      <div class="macro-block">
+        <h3>México — Foco del análisis</h3>
+        <p>Peso fuerte por carry trade (~17.3 MXN/USD). Banxico cerró ciclo de recortes en 6.50%. La economía se contrajo 0.6% en Q1. PIB 2026 recortado a 1.1%. Revisión T-MEC en julio como catalizador clave.</p>
+        <div class="macro-kpi">
+          <div class="kpi-pill"><span class="kval">~17.3</span><span class="klbl">MXN/USD spot</span></div>
+          <div class="kpi-pill"><span class="kval">6.50%</span><span class="klbl">Tasa Banxico</span></div>
+          <div class="kpi-pill"><span class="kval">1.1%</span><span class="klbl">PIB 2026</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="app-buttons">
+      <a href="https://retofinanzas03.shinyapps.io/apppy1/" target="_blank" class="app-btn orange">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Indicadores Macroeconómicos
+      </a>
+      <a href="https://retofinanzas03.shinyapps.io/arauco_fx_straddle/" target="_blank" class="app-btn taupe">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Análisis de Divisas
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- EXPOSICIÓN FX -->
+<section id="exposicion" class="on-white">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Análisis cambiario</span>
+      <h2>Exposición al Tipo de Cambio USD/MXN</h2>
+      <div class="divider"></div>
+      <p>Arauco produce localmente en México vendiendo en MXN, pero sus principales insumos se cotizan en USD. Esta brecha estructural es la raíz del riesgo cambiario.</p>
+    </div>
+    <div class="exposure-grid">
+      <div class="exp-card"><span class="e-icon">🪵</span><h4>Madera</h4><p>Costo de <strong>US$80/m³</strong>. Principal insumo variable de MDF, cotizado en dólares.</p></div>
+      <div class="exp-card"><span class="e-icon">🧪</span><h4>Resinas</h4><p>Costo de <strong>US$40/m³</strong>. Derivadas de urea, metanol y fenol — todos en USD.</p></div>
+      <div class="exp-card"><span class="e-icon">⚗️</span><h4>Urea (+49%)</h4><p>Saltó de US$655 a <strong>US$975/ton</strong> en 4 meses. Representa 45–55% del costo de la resina.</p></div>
+      <div class="exp-card"><span class="e-icon">🛢️</span><h4>Metanol</h4><p>Alcanzó <strong>US$1,200/ton</strong> en 2026. Representa 8–12% del costo de la resina.</p></div>
+      <div class="exp-card"><span class="e-icon">🏭</span><h4>Fenol</h4><p>Cotización de <strong>US$1,600–1,900/ton</strong>. Insumo fuera del control operativo de Arauco.</p></div>
+      <div class="exp-card"><span class="e-icon">💰</span><h4>Ingresos en MXN</h4><p>Ventas fijadas en pesos. Con 30–40% de participación, difícil trasladar alzas al cliente.</p></div>
+    </div>
+    <div class="highlight-box">
+      <h3>El Problema Central: Desajuste Estructural de Moneda</h3>
+      <p>Arauco México tiene <strong>US$345M en inversiones activas</strong> y costos variables cotizados en USD, pero cobra en MXN. Cualquier depreciación del peso impacta directamente los márgenes sin posibilidad de ajuste inmediato de precios.</p>
+      <div class="hb-grid">
+        <div class="hb-item"><span class="hv">$17.28</span><div class="hl">TC base (spot)</div></div>
+        <div class="hb-item"><span class="hv">+$1.72M MXN</span><div class="hl">Sobrecosto si TC sube a $19 (1M USD)</div></div>
+        <div class="hb-item"><span class="hv">US$1M</span><div class="hl">Exposición ejemplo cubierto</div></div>
+        <div class="hb-item"><span class="hv">5.9%</span><div class="hl">Costo total del straddle</div></div>
+      </div>
+    </div>
+    <h3 class="subsection-title">Factores que Impulsan la Depreciación del Peso</h3>
+    <div class="cards cols-4">
+      <div class="card"><div class="card-icon">📉</div><h3>Crecimiento débil</h3><p>Contracción de 0.6% en Q1 2026. Consenso recortó pronóstico anual a 1.09%.</p></div>
+      <div class="card"><div class="card-icon">📝</div><h3>Revisión T-MEC</h3><p>BBVA estima movimiento a $18.00–$18.50. Si se complica, riesgo de superar $20 MXN/USD.</p></div>
+      <div class="card"><div class="card-icon">💵</div><h3>Dólar global firme</h3><p>DXY ~99 y Fed en 3.5–3.75% sin prisa por recortar deterioran monedas emergentes.</p></div>
+      <div class="card"><div class="card-icon">🌍</div><h3>Geopolítica</h3><p>Guerra en Medio Oriente genera aversión al riesgo y salidas de capital de economías emergentes.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- RIESGOS -->
+<section id="riesgos" class="on-gray">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Gestión de riesgos</span>
+      <h2>Análisis de Riesgo — Arauco México</h2>
+      <div class="divider"></div>
+      <p>Mapa de los principales riesgos que enfrenta la operación mexicana de Arauco, desde exposición cambiaria hasta compliance ambiental.</p>
+    </div>
+    <div class="risk-grid">
+      <div class="risk-card high"><h4>Riesgo Cambiario (FX)</h4><p>Vende en MXN pero sus dos mayores costos variables (madera US$80/m³ y resinas US$40/m³) se cotizan en USD. Un peso débil aumenta directamente los costos de producción.</p></div>
+      <div class="risk-card high"><h4>Riesgo en Commodities</h4><p>Insumos químicos clave subieron drásticamente en 2026: urea +49%, metanol alcanzó US$1,200/ton. Todos fuera del control operativo de Arauco.</p></div>
+      <div class="risk-card"><h4>Riesgo de Apalancamiento</h4><p>Deuda Neta/EBITDA de 5.15x. Margen financiero limitado ante periodos de volatilidad cambiaria o de materias primas.</p></div>
+      <div class="risk-card"><h4>Riesgo en Ejecución Capex</h4><p>US$345M en inversiones activas pactadas en USD. Un peso débil incrementa el costo proyectado de finalización de estas obras.</p></div>
+      <div class="risk-card medium"><h4>Riesgo Competitivo</h4><p>Competidores como Kronospan y West Fraser pueden tener mayores ventajas de escala en coberturas ante volatilidad extrema.</p></div>
+      <div class="risk-card medium"><h4>Riesgo Ambiental</h4><p>Como primera empresa forestal carbono neutral, cambios regulatorios podrían elevar significativamente los costos de cumplimiento y certificación.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- COBERTURA -->
+<section id="cobertura" class="on-white">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Estrategia de cobertura</span>
+      <h2>Estrategia Straddle con Opciones sobre Divisas</h2>
+      <div class="divider"></div>
+      <p>Para proteger el costo en pesos de los insumos importados, se analiza una estrategia straddle: compra simultánea de una call y una put sobre USD/MXN, convirtiendo un riesgo ilimitado en un costo fijo y conocido.</p>
+    </div>
+    <h3 class="subsection-title">Supuestos del Modelo</h3>
+    <table class="supuestos-table">
+      <thead><tr><th>Parámetro</th><th>Valor</th></tr></thead>
+      <tbody>
+        <tr><td>Tipo de cambio actual (spot)</td><td>17.28 MXN/USD</td></tr>
+        <tr><td>Monto cubierto (exposición ejemplo)</td><td>1,000,000 USD</td></tr>
+        <tr><td>Plazo de la cobertura</td><td>6 meses</td></tr>
+        <tr><td>Volatilidad anual esperada</td><td>10.5%</td></tr>
+        <tr><td>Tasa de interés en México (Banxico)</td><td>6.50%</td></tr>
+        <tr><td>Tasa de interés en EE.UU. (Fed)</td><td>3.62%</td></tr>
+      </tbody>
+    </table>
+    <h3 class="subsection-title">¿Cómo Funciona el Straddle?</h3>
+    <div class="cards cols-2">
+      <div class="card"><div class="card-icon">📈</div><h3>Opción Call — Protección para Importadores</h3><p>Derecho a comprar dólares al precio pactado (17.28). Si el dólar sube a 19.00, compramos a 17.28 y ganamos la diferencia. Si baja, no ejercemos. <strong>Protección natural contra el encarecimiento de la resina.</strong></p></div>
+      <div class="card"><div class="card-icon">📉</div><h3>Opción Put — Ganancia si el Peso se Fortalece</h3><p>Derecho a vender dólares al precio pactado. Gana valor cuando el peso se aprecia. <strong>Genera ganancia adicional si el peso sube con fuerza.</strong></p></div>
+    </div>
+    <h3 class="subsection-title">Costo de la Estrategia (por 1M USD)</h3>
+    <div class="straddle-costs">
+      <div class="cost-box"><div class="cost-lbl">Prima de la Call (protege si el dólar sube)</div><div class="cost-val">$629,603 MXN</div><div class="cost-sub">0.6296 MXN por USD</div></div>
+      <div class="cost-box"><div class="cost-lbl">Prima de la Put (gana si el peso sube)</div><div class="cost-val">$386,986 MXN</div><div class="cost-sub">0.3870 MXN por USD</div></div>
+      <div class="cost-box highlight"><div class="cost-lbl">Prima Total del Straddle</div><div class="cost-val">$1,016,589 MXN</div><div class="cost-sub">5.9% del monto cubierto — pérdida máxima posible</div></div>
+    </div>
+    <div class="callout"><strong>Principio clave:</strong> La prima es el desembolso inicial y representa la <strong>pérdida máxima posible</strong>. Pase lo que pase con el tipo de cambio, nunca se pierde más que la prima pagada — igual que una póliza de seguro.</div>
+  </div>
+</section>
+
+<!-- ESCENARIOS -->
+<section id="escenarios" class="on-gray">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Análisis de escenarios</span>
+      <h2>Proyección a 6 Meses: Tres Escenarios</h2>
+      <div class="divider"></div>
+      <p>Todos los escenarios parten de un costo base de resina de <strong>$17,280,000 MXN</strong> (1M USD al tipo de cambio 17.28). Se evalúa el resultado neto con y sin cobertura straddle.</p>
+    </div>
+    <div class="scenario-grid">
+      <div class="scenario-card pessimist">
+        <span class="sc-label">Escenario Pesimista</span>
+        <div class="sc-rate">$19.00</div>
+        <h3>Peso se debilita +10%</h3>
+        <div class="sc-row"><span class="sc-lbl">Costo resina al tipo final</span><span class="sc-val">$19,000,000 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">Sobrecosto sin cobertura</span><span class="sc-val">+$1,720,000 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">Resultado del straddle</span><span class="sc-val">+$703,411 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">TC efectivo logrado</span><span class="sc-val">$18.30</span></div>
+        <div class="sc-net"><span class="net-lbl">Resultado neto con cobertura</span><div class="net-val">($1,016,589 MXN)</div></div>
+      </div>
+      <div class="scenario-card base">
+        <span class="sc-label">Escenario Base</span>
+        <div class="sc-rate">$17.85</div>
+        <h3>Peso se debilita +3%</h3>
+        <div class="sc-row"><span class="sc-lbl">Costo resina al tipo final</span><span class="sc-val">$17,850,000 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">Sobrecosto sin cobertura</span><span class="sc-val">+$570,000 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">Resultado del straddle</span><span class="sc-val">($446,589 MXN)</span></div>
+        <div class="sc-row"><span class="sc-lbl">TC efectivo logrado</span><span class="sc-val">$18.30</span></div>
+        <div class="sc-net"><span class="net-lbl">Resultado neto con cobertura</span><div class="net-val">($1,016,589 MXN)</div></div>
+      </div>
+      <div class="scenario-card optimist">
+        <span class="sc-label">Escenario Optimista</span>
+        <div class="sc-rate">$16.00</div>
+        <h3>Peso se fortalece −7%</h3>
+        <div class="sc-row"><span class="sc-lbl">Costo resina al tipo final</span><span class="sc-val">$16,000,000 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">Ahorro sin cobertura</span><span class="sc-val">($1,280,000 MXN)</span></div>
+        <div class="sc-row"><span class="sc-lbl">Resultado del straddle</span><span class="sc-val">+$263,411 MXN</span></div>
+        <div class="sc-row"><span class="sc-lbl">TC efectivo logrado</span><span class="sc-val">$15.74</span></div>
+        <div class="sc-net"><span class="net-lbl">Resultado neto con cobertura</span><div class="net-val">+$1,543,411 MXN</div></div>
+      </div>
+    </div>
+    <h3 class="subsection-title">Valor Esperado: ¿Conviene Cubrirse?</h3>
+    <table class="ve-table">
+      <thead>
+        <tr><th style="text-align:left;">Escenario</th><th>Probabilidad</th><th>Con Straddle</th><th>Sin Cobertura</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Pesimista (dólar $19.00)</td><td>42.5%</td><td style="color:#B03020;">($1,016,589)</td><td style="color:#B03020;">($1,720,000)</td></tr>
+        <tr><td>Base (dólar $17.85)</td><td>32.5%</td><td style="color:#B03020;">($1,016,589)</td><td style="color:#B03020;">($570,000)</td></tr>
+        <tr><td>Optimista (dólar $16.00)</td><td>25.0%</td><td style="color:var(--taupe);">+$1,543,411</td><td style="color:var(--taupe);">+$1,280,000</td></tr>
+        <tr><td><strong>Valor Esperado (ponderado)</strong></td><td><strong>100%</strong></td><td><strong style="color:var(--taupe);">($376,589)</strong></td><td><strong style="color:#B03020;">($596,250)</strong></td></tr>
+      </tbody>
+    </table>
+    <div class="callout"><strong>Conclusión:</strong> El straddle reduce el costo esperado de <strong>$596,250 MXN</strong> a <strong>$376,589 MXN</strong>, una diferencia de <strong>+$219,661 MXN</strong> a favor de cubrirse. La cobertura no sólo da certeza — en promedio, también sale más barata.</div>
+    <div class="highlight-box">
+      <h3>Recomendación Final</h3>
+      <p>Dado el entorno de alta incertidumbre cambiaria y la expectativa de que el peso pierda valor (revisión T-MEC en julio, dólar firme, geopolítica), el <strong>straddle es una herramienta razonable</strong> para acotar el riesgo sobre insumos en dólares. La pérdida máxima es conocida desde el día uno: la prima de $1,016,589 MXN por millón de dólares cubierto.</p>
+      <div class="hb-grid">
+        <div class="hb-item"><span class="hv">$1,016,589 MXN</span><div class="hl">Pérdida máxima (prima)</div></div>
+        <div class="hb-item"><span class="hv">5.9%</span><div class="hl">Costo como % del monto cubierto</div></div>
+        <div class="hb-item"><span class="hv">$18.30</span><div class="hl">TC efectivo en escenario adverso</div></div>
+        <div class="hb-item"><span class="hv">+$219,661 MXN</span><div class="hl">Ventaja en valor esperado</div></div>
+      </div>
+    </div>
+
+    <div class="app-buttons" style="justify-content: center; margin-top: 2.5rem;">
+      <a href="https://retofinanzas03.shinyapps.io/apppy/" target="_blank" class="app-btn orange" style="font-size: 0.95rem; padding: 0.9rem 2rem;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Explorar App de Estrategia de Cobertura
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FUENTES -->
+<section id="fuentes" class="on-white">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Bibliografía</span>
+      <h2>Fuentes y Referencias</h2>
+      <div class="divider"></div>
+      <p>Todas las cifras y datos utilizados en este análisis provienen de las siguientes fuentes primarias y secundarias.</p>
+    </div>
+    <div class="sources-list">
+      <div class="source-item">Arauco. (2025). <em>Annual Report 2025.</em> <a href="https://www.arauco.com" target="_blank">www.arauco.com</a></div>
+      <div class="source-item">Arauco. (2025, diciembre). <em>Investor Presentation December 2025.</em> <a href="https://www.arauco.com" target="_blank">www.arauco.com</a></div>
+      <div class="source-item">Arauco. (2026, mayo). <em>Presentación Estratégica Tec de Monterrey — Arauco México.</em> Documento interno.</div>
+      <div class="source-item">Arauco. (2026). <em>Catálogo de Productos y Tendencias 2026.</em> <a href="https://mx.arauco.com" target="_blank">mx.arauco.com</a></div>
+      <div class="source-item">Arauco. (2026). <em>Estructura de Costos Variables MDF y Materias Primas Principales 2026.</em> Reporte interno.</div>
+      <div class="source-item">Arauco. (2025, febrero). <em>4Q 2024 Press Release — Renewables for a Better Life.</em> <a href="https://arauco.com/wp-content/uploads/2025/02/2024.12-Press-Release-VF-1.pdf" target="_blank">Ver PDF</a></div>
+      <div class="source-item">Banco de México. (2026). <em>Tipo de Cambio Fix USD/MXN — Serie SF43718.</em> <a href="https://www.banxico.org.mx" target="_blank">www.banxico.org.mx</a></div>
+      <div class="source-item">World Bank Group. (2025, abril). <em>Commodity Markets Outlook: April 2025.</em> <a href="https://thedocs.worldbank.org/en/doc/1b388949805c9a0ae3736bdacb32ea94-0050012025/original/CMO-April-2025.pdf" target="_blank">Ver documento</a></div>
+      <div class="source-item">Dexco. (2024). <em>Annual Report 2024.</em> <a href="https://www.dexco.com.br" target="_blank">www.dexco.com.br</a></div>
+      <div class="source-item">Egger Group. (2025). <em>Corporate Information.</em> <a href="https://www.egger.com" target="_blank">www.egger.com</a></div>
+      <div class="source-item">FINSA. (2025). <em>Empresa.</em> <a href="https://www.finsa.com" target="_blank">www.finsa.com</a></div>
+      <div class="source-item">Kronospan. (2025). <em>About Kronospan.</em> <a href="https://www.kronospan.com" target="_blank">www.kronospan.com</a></div>
+      <div class="source-item">West Fraser. (2024). <em>Annual Report 2024.</em> <a href="https://www.westfraser.com" target="_blank">www.westfraser.com</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div style="margin-bottom: 1rem;">
+    <svg width="150" height="44" viewBox="0 0 150 44" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.8;">
+      <text x="0" y="29" font-family="'Segoe UI', system-ui, sans-serif" font-size="29" font-weight="800" letter-spacing="-0.5" fill="#D8C8B8">arauco</text>
+      <text x="2" y="42" font-family="'Segoe UI', system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="3" fill="#F47920">MELAMINA</text>
+    </svg>
+  </div>
+  <p><strong>Equipo 3</strong> — Análisis Estratégico de Exposición Cambiaria FX · México, LATAM</p>
+  <p style="margin-top: 0.35rem;">Actualizado 2026 · © 2026 Arauco. Todos los derechos reservados.</p>
+</footer>
+
+<script>
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        navLinks.forEach(a => a.classList.remove('active'));
+        const a = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
+        if (a) a.classList.add('active');
+      }
+    });
+  }, { threshold: 0.35 });
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
